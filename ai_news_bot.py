@@ -132,7 +132,7 @@ def summarize_with_claude(items, api_key, model):
     headers = {"Authorization": f"Bearer {api_key}", "x-api-key": api_key,
                "anthropic-version": "2023-06-01", "content-type": "application/json"}
     if os.environ.get("ANTHROPIC_WORKSPACE_ID"):
-        headers["anthropic-workspace-id"] = os.environ["ANTHROPIC_WORKSPACE_ID"]
+        headers["anthropic-workspace-id"] = os.environ["ANTHROPIC_WORKSPACE_ID"].strip()
     raw = fetch("https://api.anthropic.com/v1/messages", data=body, timeout=90, headers=headers)
     text = "".join(b.get("text", "") for b in json.loads(raw).get("content", []))
     m = re.search(r"\{.*\}", text, re.S)
@@ -186,13 +186,15 @@ def send_telegram(token, chat_id, text):
 def main():
     hours = int(os.environ.get("LOOKBACK_HOURS", "24"))
     dry = os.environ.get("DRY_RUN") == "1"
-    token, chat = os.environ.get("TELEGRAM_BOT_TOKEN"), os.environ.get("TELEGRAM_CHAT_ID")
+    # .strip(): secret dán vào GitHub hay bị dính dấu cách / xuống dòng ở cuối
+    token = (os.environ.get("TELEGRAM_BOT_TOKEN") or "").strip()
+    chat = (os.environ.get("TELEGRAM_CHAT_ID") or "").strip()
     if not dry and not (token and chat):
         sys.exit("Thiếu TELEGRAM_BOT_TOKEN hoặc TELEGRAM_CHAT_ID")
     items = collect(hours)
     print(f"Tìm thấy {len(items)} tin trong {hours} giờ qua", file=sys.stderr)
     summarized = []
-    key = os.environ.get("ANTHROPIC_API_KEY")
+    key = (os.environ.get("ANTHROPIC_API_KEY") or "").strip()
     if key and items:
         try:
             summarized = summarize_with_claude(items, key, os.environ.get("CLAUDE_MODEL", "claude-haiku-5-5"))
