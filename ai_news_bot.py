@@ -17,6 +17,7 @@ import json
 import os
 import re
 import sys
+import urllib.error
 import urllib.parse
 import urllib.request
 import xml.etree.ElementTree as ET
@@ -38,8 +39,12 @@ ATOM = "{http://www.w3.org/2005/Atom}"
 
 def fetch(url, data=None, headers=None, timeout=25):
     req = urllib.request.Request(url, data=data, headers={"User-Agent": UA, **(headers or {})})
-    with urllib.request.urlopen(req, timeout=timeout) as r:
-        return r.read()
+    try:
+        with urllib.request.urlopen(req, timeout=timeout) as r:
+            return r.read()
+    except urllib.error.HTTPError as ex:  # in nội dung lỗi để dễ sửa (không chứa token)
+        detail = ex.read().decode("utf-8", "replace")[:500]
+        raise RuntimeError(f"HTTP {ex.code}: {detail}") from None
 
 
 def parse_date(s):
