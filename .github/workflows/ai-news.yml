@@ -1,0 +1,24 @@
+name: VCT Labs AI news to Telegram
+
+on:
+  schedule:
+    - cron: "17 1 * * *"   # 08:17 giờ Việt Nam mỗi ngày (01:17 UTC)
+  workflow_dispatch: {}     # cho phép bấm "Run workflow" để chạy thử
+
+jobs:
+  send:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Gửi tin AI mới
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          ANTHROPIC_WORKSPACE_ID: ${{ secrets.ANTHROPIC_WORKSPACE_ID }}
+          LOOKBACK_HOURS: "24"
+        run: python ai_news_bot.py
