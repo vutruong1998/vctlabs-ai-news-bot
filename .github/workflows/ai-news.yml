@@ -2,7 +2,7 @@ name: VCT Labs AI news to Telegram
 
 on:
   schedule:
-    - cron: "45 11 * * *"  # 18:45 giờ Việt Nam mỗi ngày (11:45 UTC)
+    - cron: "0 0 * * *"    # 00:00 UTC mỗi ngày (07:00 giờ Việt Nam)
   workflow_dispatch: {}     # cho phép bấm "Run workflow" để chạy thử
 
 jobs:
